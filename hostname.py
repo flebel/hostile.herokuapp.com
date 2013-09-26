@@ -5,13 +5,17 @@ import socket
 
 
 def get_hostname(environ, start_response):
+  if 'HTTP_X_FORWARDED_FOR' in environ:
+    ip = environ['HTTP_X_FORWARDED_FOR'].split(',')[0]
+  else:
+    ip = environ['REMOTE_ADDR']
   if hasattr(socket, 'setdefaulttimeout'):
     socket.setdefaulttimeout(5) # Seconds
-  hostname = socket.gethostbyaddr(environ['REMOTE_ADDR'])
+  hostname = socket.gethostbyaddr(ip)
   status = '200 OK'
   response_headers = [('Content-type','text/plain')]
   start_response(status, response_headers)
-  return hostname[0]
+  return [hostname[0]]
 
 
 if __name__ == '__main__':
